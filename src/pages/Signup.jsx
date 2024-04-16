@@ -19,18 +19,16 @@ function Signup() {
         "https://ecoprintbackend.onrender.com/api/user/signup",
         formData
       );
-      //   if (res.data.status === "failed") {
-      //     return alert("Incorrect login information");
-      //   }
-      setUserId(res.data.data._id);
-      // console.log(res.data.data.jwtToken);
-
-      setCookie("token", res.data.data.jwtToken);
-      navigate("/all");
+      if (res.data && res.data.data && res.data.data._id) {
+        setUserId(res.data.data._id);
+        setCookie("token", res.data.data.jwtToken);
+        navigate("/all");
+        reset(); // Reset form fields
+      } else {
+        console.error("Invalid response from server");
+      }
     } catch (error) {
-      console.error("Signup error:", error);
-    } finally {
-      // Reset form after submission, regardless of success or failure
+      alert("Duplicate Error", error);
     }
   };
 

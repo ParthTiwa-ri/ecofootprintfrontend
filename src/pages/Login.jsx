@@ -11,25 +11,26 @@ function Login() {
   const [cookies, setCookie] = useCookies(["token"]);
   const { setUserId } = useAuth();
   const navigate = useNavigate();
-
   const handleLogin = async (formData) => {
     try {
       const res = await axios.post(
         "https://ecoprintbackend.onrender.com/api/user/signin",
         formData
       );
-      //   if (res.data.status === "failed") {
-      //     return alert("Incorrect login information");
-      //   }
-      setUserId(res.data.data.userId);
-      console.log(res.data);
-      setCookie("token", res.data.data);
-      navigate("/dashboard");
-
-      //   console.log(res.data);
+      // Check if login was successful
+      if (res.data && res.data.data && res.data.data.userId) {
+        setUserId(res.data.data.userId);
+        setCookie("token", res.data.data.token); // Assuming token is returned in the response
+        navigate("/dashboard");
+      } else {
+        // Handle invalid response from the server
+        alert("Wrong email and pass");
+        // Optionally, you can show an error message to the user
+      }
     } catch (error) {
-      console.error("Login error:", error);
-      // Optionally, you can show an error message to the user
+      alert("Wrong email or password", error);
+      // Show an error message to the user
+      // For example, you can set a state variable to display an error message in your UI
     } finally {
       // Reset form after submission, regardless of success or failure
     }

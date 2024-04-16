@@ -10,12 +10,12 @@ export const useStateContext = () => useContext(StateContext);
 // Create the provider component
 export const StateProvider = ({ children }) => {
   const [selectedOption, setSelectedOption] = useState("");
-  const [sliderValue, setSliderValue] = useState(0);
+  const [sliderValue, setSliderValue] = useState();
   const [trashSize, setTrashSize] = useState("");
-  const [sliderValue1, setSliderValue1] = useState(0);
-  const [sliderValue2, setSliderValue2] = useState(0);
-  const [carSliderValue, setCarSliderValue] = useState(0);
-  const [bikeSliderValue, setBikeSliderValue] = useState(0);
+  const [sliderValue1, setSliderValue1] = useState();
+  const [sliderValue2, setSliderValue2] = useState();
+  const [carSliderValue, setCarSliderValue] = useState();
+  const [bikeSliderValue, setBikeSliderValue] = useState();
 
   return (
     <StateContext.Provider

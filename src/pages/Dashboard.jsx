@@ -6,57 +6,53 @@ import { useRecoilState } from "recoil";
 import { coin } from "./state";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 const API_KEY = "AIzaSyAxvALcPFqQW5iaYtM7X5NhzCg6WBRiTZ8";
+
 function Dashboard() {
   const { userId } = useAuth();
   const [data, setData] = useState();
   const [carbonData, setCarbonData] = useState();
   const [recomendData, setRecomendData] = useState();
-  //   const [geminidata, setgeminiData] = useState();
+  const [loading, setLoading] = useState(true); // Add loading state
 
   const genAI = new GoogleGenerativeAI(API_KEY);
 
   useEffect(() => {
     async function run() {
-      // For text-only input, use the gemini-pro model
-      const postData = {
-        userId,
-      };
-      const res = await axios.post(
-        "https://ecoprintbackend.onrender.com/api/lifestyle/get",
-        postData
-      );
-      const cdata = res.data.data;
-      const des = JSON.stringify(cdata);
-      //   console.log(des);
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      try {
+        const postData = { userId };
+        const res = await axios.post(
+          "https://ecoprintbackend.onrender.com/api/lifestyle/get",
+          postData
+        );
+        const cdata = res.data.data;
+        const des = JSON.stringify(cdata);
 
-      const prompt = `Give personalized recommendation to reduce carbon footprint according to given data of user ${des} (in plane text no heading ) `;
-      //   console.log(prompt);
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = await response.text(); // await here to get the text content
-      console.log(text);
-      setRecomendData(text);
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const prompt = `Give personalized recommendation to reduce carbon footprint according to given data of user ${des} (in plane text no heading ) `;
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = await response.text();
+        setRecomendData(text);
+        setLoading(false); // Set loading to false after data is fetched
+      } catch (error) {
+        console.error("Error fetching recommendation data:", error);
+      }
     }
 
-    run(); // Call the run function when the component mounts
+    run();
   }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const postData = {
-          id: userId,
-        };
+        const postData = { id: userId };
         const res = await axios.post(
           "https://ecoprintbackend.onrender.com/api/user/get",
           postData
         );
-
         setData(res.data.data);
-        // Handle response
-        // console.log(res.data);
       } catch (error) {
-        // Handle error
+        console.error("Error fetching user data:", error);
       }
     };
 
@@ -68,19 +64,14 @@ function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const postData = {
-          userId,
-        };
+        const postData = { userId };
         const res = await axios.post(
           "https://ecoprintbackend.onrender.com/api/carbonfootprint/get",
           postData
         );
-
         setCarbonData(res.data.data);
-        // Handle response
-        // console.log(res.data);
       } catch (error) {
-        // Handle error
+        console.error("Error fetching carbon footprint data:", error);
       }
     };
 
@@ -90,11 +81,11 @@ function Dashboard() {
   }, [userId]);
 
   return (
-    <div className=" bg-base-300 min-h-screen">
+    <div className="bg-base-300 min-h-screen">
       <Navbar />
       <header className="p-10 pb-1">
-        <h2 className="text-5xl ">
-          Welcome <p className=" inline text-green-500 ">{data?.username}</p>
+        <h2 className="text-5xl">
+          Welcome <span className="text-green-500">{data?.username}</span>
         </h2>
         <section className="statshow py-8">
           <StatsShow carbonData={carbonData} />
@@ -104,8 +95,11 @@ function Dashboard() {
           You need to plant around{" "}
           <span className="text-green-500">
             {(carbonData / 48)?.toFixed(0)}
-          </span>
-          <span> </span>trees each month to offset {carbonData?.toFixed(2)}{" "}
+          </span>{" "}
+          trees each month to offset{" "}
+          {typeof carbonData === "number"
+            ? carbonData?.toFixed(2)
+            : "data not available"}{" "}
           pound of carbon emission
         </p>
       </header>
@@ -113,7 +107,9 @@ function Dashboard() {
         <p className="text-green-500 text-2xl mb-5">
           Your personalized recommendations are
         </p>
-        {recomendData && (
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
           <ul className="list-disc list-inside">
             {recomendData.split("*").map(
               (item, index) =>
