@@ -1,8 +1,26 @@
 import { Link } from "react-router-dom";
 import Footer from "../Components/Footer";
 import ScollFeature from "../Components/scroll/ScrollFeature";
+import { useEffect } from "react";
+import axios from "axios";
 
 function HeroPage() {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // const postData = { id: userId };
+        const res = await axios.post(
+          "https://ecoprintbackend.onrender.com/api/user/get",
+          { id: "009877" }
+        );
+        console.log(res.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
   return (
     <>
       <div className="heroPage">
